@@ -1,56 +1,92 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { connect } from 'dva'
-import { Button, Row, Form, Input ,Col} from 'antd'
-import { config } from 'utils'
+import {connect} from 'dva'
+import {Button, Row, Form, Input, Col} from 'antd'
+import {config} from 'utils'
 import styles from './index.less'
 
 const FormItem = Form.Item
 
 const Login = ({
-  loading,
-  dispatch,
-  login,
-  form: {
-    getFieldDecorator,
-    validateFieldsAndScroll,
-  },
-}) => {
-  function handleOk () {
+                 loading,
+                 dispatch,
+                 login,
+                 form: {
+                   getFieldDecorator,
+                   validateFieldsAndScroll,
+                 },
+               }) => {
+
+  if(login.msgSendSuccess && !login.countStart) {
+    countDown()
+    setTimeout(() => {
+      dispatch({type: 'login/updateLogin', payload: {countStart: true}})
+    }, 0)
+  }
+
+  function countDown() {
+    let time = 60
+    let t = setInterval(() => {
+      time--
+      dispatch({
+        type: 'login/updateLogin',
+        payload: {
+          msgButtonCoolDown: time,
+          msgButton: t,
+        }
+      })
+      if(time === 0) {
+        clearInterval(t)
+        dispatch({
+          type: 'login/updateLogin', payload: {
+            countStart: false,
+            msgSendSuccess: false
+          }
+        })
+      }
+    }, 1000)
+  }
+
+  function handleOk() {
+
     validateFieldsAndScroll((errors, values) => {
-      if (errors) {
+      console.log('debug values', values)
+      if(errors) {
         return
       }
-      dispatch({ type: 'login/login', payload: values })
+      dispatch({type: 'login/login', payload: Object.assign({}, values, {sendType: login.sendType || 'login'}), values})
     })
   }
-  console.log('HELP:',login)
+
+
+  function handleSendMsg() {
+    validateFieldsAndScroll(['tel'], {force: true}, (errors, values) => {
+        if(errors) {
+          return
+        }
+        dispatch({type: 'login/fetchAuthMsg', payload: values})
+      }
+    );
+  }
+
+
   return (
     <div className={styles.form}>
       <div className={styles.logo}>
-        <img alt={'logo'} src={config.logo} />
+        <img alt={'logo'} src={config.logo}/>
         <span>{config.name}</span>
       </div>
       <form>
         <FormItem hasFeedback>
-          {getFieldDecorator('userName', {
+          {getFieldDecorator('tel', {
+            // setFieldsValue: '123123',
             rules: [
               {
                 required: true,
-              message:'请输入手机号'
+                message: '请输入手机号',
               },
             ],
-          })(<Input size="large" onPressEnter={handleOk} placeholder="手机号" />)}
-        </FormItem>
-        <FormItem hasFeedback>
-          {getFieldDecorator('password', {
-            rules: [
-              {
-                required: true,
-                message:'请输入密码'
-              },
-            ],
-          })(<Input size="large" type="password" onPressEnter={handleOk} placeholder="验证码" />)}
+          })(<Input type={'tel'} size="large" placeholder="请输入手机号"/>)}
         </FormItem>
 
 
@@ -61,68 +97,22 @@ const Login = ({
                 rules: [
                   {
                     required: true,
-                    pattern:/\d{4}/,
-                    message:'请输入六位验证码'
+                    pattern: /\d{6}/,
+                    message: '请输入六位验证码'
                   },
                 ],
-              })(<Input maxLength="4" size="large" type="text" onPressEnter={handleOk} placeholder="请短信验证码" />)}
+              })(<Input maxLength="6" size="large" type="text" onPressEnter={handleSendMsg} placeholder="请短信验证码"/>)}
             </FormItem>
-            <div style={{display:'none'}}>
-              <FormItem hasFeedback>
-                {getFieldDecorator('imgToken', {
-                  initialValue: login.yzm.imgToken,
-                  rules: [
-                    {
-                      required: true,
-
-                      message:'请输入验证码'
-                    },
-                  ],
-                })(<Input  />)}
-              </FormItem>
-            </div>
           </Col>
           <Col span={2}>
 
           </Col>
           <Col span={8}>
-            <img style={{width:'100%',height:'32px'}} src={'data:image/png;base64,' + login.yzm.img} />
-          </Col>
-        </Row>
-
-        <Row type="flex" justify="space-between">
-          <Col span={14}>
-            <FormItem hasFeedback>
-              {getFieldDecorator('imgCode', {
-                rules: [
-                  {
-                    required: true,
-                    pattern:/\d{4}/,
-                    message:'请输入四位验证码'
-                  },
-                ],
-              })(<Input maxLength="4" size="large" type="text" onPressEnter={handleOk} placeholder="请输入验证码" />)}
-            </FormItem>
-            <div style={{display:'none'}}>
-              <FormItem hasFeedback>
-                {getFieldDecorator('imgToken', {
-                  initialValue: login.yzm.imgToken,
-                  rules: [
-                    {
-                      required: true,
-
-                      message:'请输入验证码'
-                    },
-                  ],
-                })(<Input  />)}
-              </FormItem>
-            </div>
-          </Col>
-          <Col span={2}>
-
-          </Col>
-          <Col span={8}>
-            <img style={{width:'100%',height:'32px'}} src={'data:image/png;base64,' + login.yzm.img} />
+            <Button
+              disabled={login.countStart}
+              type="primary" size="large" onClick={handleSendMsg} loading={loading.effects.login}>
+              发送 {login.countStart ? login.msgButtonCoolDown : ''}
+            </Button>
           </Col>
         </Row>
 
@@ -144,4 +134,4 @@ Login.propTypes = {
   loading: PropTypes.object,
 }
 
-export default connect(({ login,loading }) => ({login, loading }))(Form.create()(Login))
+export default connect(({login, loading}) => ({login, loading}))(Form.create()(Login))
