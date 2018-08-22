@@ -1,18 +1,19 @@
-import { routerRedux } from 'dva/router'
+import {routerRedux} from 'dva/router'
 //import { login } from 'services/login'
 
 
 import axios from 'axios'
-import { notification } from 'antd';
-async function login (params) {
+import {notification} from 'antd';
+
+async function login(params) {
   return axios({
     method: 'post',
-    url: $BASE + 'sys/user/login.htm',
+    url: $BASE + 'htmLoginByTel.htm',
     data: params
   })
 }
 
-async function yzm (params) {
+async function yzm(params) {
   return axios({
     method: 'post',
     url: $BASE + 'verification/getImg.htm',
@@ -21,7 +22,7 @@ async function yzm (params) {
 }
 
 
-async function menu (params) {
+async function menu(params) {
   return axios({
     method: 'post',
     url: $BASE + 'sys/user/getRootTabsByUser.do',
@@ -29,73 +30,88 @@ async function menu (params) {
   })
 }
 
+async function fetchAuthMsg(params) {
+  return axios({
+    method: 'post',
+    url: $BASE + 'htmSendTelCode.htm',
+    data: params
+  })
+}
+
 export default {
   namespace: 'login',
 
-  state: {yzm:{},menu:[]},
+  state: {yzm: {}, menu: []},
   subscriptions: {
-    setup ({ dispatch, history }) {
+    setup({dispatch, history}) {
       history.listen((location) => {
-        if (location.pathname === '/login') {
-          dispatch({
-            type: 'getYzm',
-            payload:{
-              yzm:''
-            }
-          })
+        if(location.pathname === '/login') {
+          // dispatch({
+          //   type: 'getYzm',
+          //   payload:{
+          //     yzm:''
+          //   }
+          // })
 
         }
       })
     },
   },
   reducers: {
-    updateLogin (state, { payload }) {
-      return { ...state, ...payload }
+    updateLogin(state, {payload}) {
+      return {...state, ...payload}
     },
   },
   effects: {
-    * getYzm ({
-      payload,
-    }, { put, call, select }) {
+    * getYzm({payload,}, {put, call, select}) {
       const data = yield call(yzm)
-      if (data.data.code == 0) {
-        yield put({ type: 'updateLogin', payload:{
-          yzm:data.data.response
-        }})
+      if(data.data.code == 0) {
+        yield put({
+          type: 'updateLogin', payload: {
+            yzm: data.data.response
+          }
+        })
       } else {
         throw data
       }
     },
-    * getMenu ({
-      payload,
-    }, { put, call, select }) {
+    * getMenu({payload,}, {put, call, select}) {
       const data = yield call(menu)
-      if (data.data.code == 0) {
-        yield put({ type: 'updateLogin', payload:{
-          menu:data.data.response
-        }})
+      if(data.data.code == 0) {
+        yield put({
+          type: 'updateLogin', payload: {
+            menu: data.data.response
+          }
+        })
       } else {
         throw data
       }
     },
-    * login ({
-      payload,
-    }, { put, call, select }) {
+    * login({payload,}, {put, call, select}) {
       const data = yield call(login, payload)
-      console.log('登录字段：',data)
-      const { locationQuery } = yield select(_ => _.app)
-      if (data.data.code == 0) {
-        const { from } = locationQuery;
-        localStorage.setItem('user',JSON.stringify(data.data.response));
+      console.log('登录字段：', data)
+      const {locationQuery} = yield select(_ => _.app)
+      const lg = yield select(_ => _.login)
+      if(data.data.code == 0) {
+        const {from} = locationQuery;
+        localStorage.setItem('user', JSON.stringify(data.data.response));
         yield put({
           type: 'app/updateState',
           payload: {
-            user:data.data.response
+            user: data.data.response
           },
         })
-        yield put({ type: 'app/query' })
-        if (from && from !== '/login') {
+        yield put({type: 'app/query'})
+        if(from && from !== '/login') {
           yield put(routerRedux.push(from))
+          yield put({
+            type: 'updateLogin',
+            payload: {
+              countStart: false,
+              msgSendSuccess: false
+            },
+          })
+          clearInterval(lg.msgButton)
         } else {
           yield put(routerRedux.push('/dashboard'))
         }
@@ -103,6 +119,25 @@ export default {
         throw data
       }
     },
+
+    * fetchAuthMsg({payload}, {put, call, select}) {
+      let data = yield call(fetchAuthMsg, payload)
+      // let data = {code: 0}
+      if(data.data.code == 0) {
+        let rep = data.data.response
+        yield put({
+          type: 'updateLogin',
+          payload: {
+            msgSendSuccess: true,
+            sendType: rep.sendType
+          },
+        })
+      } else {
+        throw data
+      }
+    }
+    ,
+
   },
 
 }
