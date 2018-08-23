@@ -80,15 +80,13 @@ const Filter = ({
     <div>
       <Row gutter={24}>
         <Col {...ColProps} >
-          <FilterItem label="用户名">
+          <FilterItem label="用户Id">
             {getFieldDecorator('userName', { initialValue: name })(<Input placeholder="请输入关键字"  />)}
           </FilterItem>
         </Col>
         <Col {...ColProps} >
-          <FilterItem label="创建时间">
-            {getFieldDecorator('createTime', { initialValue: initialCreateTime })(
-              <RangePicker style={{ width: '100%' }} size="large"  />
-            )}
+          <FilterItem label="手机号">
+            {getFieldDecorator('mobile', { initialValue: name })(<Input placeholder="请输入关键字"  />)}
           </FilterItem>
         </Col>
         <Col {...TwoColProps} >

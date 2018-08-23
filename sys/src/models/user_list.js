@@ -7,7 +7,7 @@ import { message ,Avatar} from 'antd';
 
 
 var api = {
-  doQuery:'pb/user/findPageSysUserList',//查询
+  doQuery:'sys/user/findPageList',//查询
   doSave:'sys/user/doSave',       //增加和修改，增加的时候不传入ID，修改的时候传入ID
   doDelete:'sys/user/doDelete',   //删除，ids:'1,2,3,4'
 }
@@ -16,22 +16,11 @@ var dataFormat = {
   nameSpace:'user_list',
   data:[
     {
-      title: 'ID',
-      dataIndex: 'id',
-    },
-    {
-      title: '用户名',
+      title: '统一用户Id',
       dataIndex: 'userName',
     },{
       title: '手机号码',
-       dataIndex: 'tel',
-    }, {
-      title: '头像',
-      dataIndex: 'headUrl',
-      noEdit:true,//是否渲染到编辑字段
-      render:(text, record, index)=>{
-        return(<Avatar src={`http://192.168.23.212/${text}`} />);
-      },
+       dataIndex: 'mobile',
     }
     ,{
     title: 'Token',

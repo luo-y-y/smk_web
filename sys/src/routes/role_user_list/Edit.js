@@ -1,6 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { Editor } from 'components'
+import { FilterItem } from 'components'
 import { Form,Select, Input, InputNumber, Radio, Modal, Table } from 'antd'
 const Option = Select.Option;
 import { Row, Col, Card,Divider,Avatar,message } from 'antd'
@@ -57,19 +58,12 @@ const modal = ({
 
   const columns1 =[
     {
-      title: '用户名',
-      dataIndex: 'userName',
-    }, {
       title: '手机号',
-      dataIndex: 'tel',
+      dataIndex: 'mobile',
     }, {
-      title: '头像',
-      dataIndex: 'headUrl',
-      noEdit:true,//是否渲染到编辑字段
-      render:(text, record, index)=>{
-        return(<Avatar src={`http://192.168.23.212/${text}`} />);
-        },
-     }
+      title: '统一用户ID',
+      dataIndex: 'userName',
+    }
   ];
   const Pagination = {
     pageSize:5,
@@ -86,8 +80,32 @@ const modal = ({
       //disabled: record.code === 'admin', // 管理员角色选中
     }),
   };
+
+  const ColProps = {
+    xs: 24,
+    sm: 6,
+    style: {
+      marginBottom: 16,
+    },
+  }
+
   return (
     <Modal {...modalOpts}>
+      <div>
+        <Row gutter={24}>
+          <Col {...ColProps} >
+            <FilterItem label="用户名">
+              <Input placeholder="请输入关键字"  />
+            </FilterItem>
+          </Col>
+          <Col >
+
+          </Col>
+          <Col >
+
+          </Col>
+        </Row>
+      </div>
       <Table dataSource={users} pagination={Pagination} size="small" columns={columns1} rowSelection={rowSelection}  rowKey={record => record.id} />
     </Modal>
   )

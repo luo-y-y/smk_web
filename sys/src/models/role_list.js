@@ -19,7 +19,7 @@ var dataFormat = {
       title: '角色编号',
       dataIndex: 'id',
       noEdit:true,//是否渲染到编辑字段
-
+      noRender:true,
     }, {
       title: '角色代码',
       dataIndex: 'code',

@@ -10,19 +10,26 @@ var api = {
   doQuery:'sys/RoleUser/findPageList',//查询
   doSave:'sys/RoleUser/doSave',       //增加和修改，增加的时候不传入ID，修改的时候传入ID
   doDelete:'sys/RoleUser/doDelete',   //删除，ids:'1,2,3,4'
-  doQueryUser:'pb/user/findPageList',//查询用户列表
+  doQueryUser:'sys/user/findPageList',//查询用户列表
 }
 
 var dataFormat = {
   nameSpace:'role_user_list',
   data:[
     {
-      title: '用户名',
+      title: '统一用户Id',
       dataIndex: 'userName',
+      noEdit:true,//是否渲染到编辑字段
+    },
+    {
+      title: '手机号',
+      dataIndex: 'mobile',
+      noEdit:true,//是否渲染到编辑字段
     },
     {
     title: '角色名称',
     dataIndex: 'roleLabel',
+      noEdit:true,//是否渲染到编辑字段
     rules: [
       {
         required: true,
@@ -30,34 +37,6 @@ var dataFormat = {
       },
       ]
   },{
-    title: 'userId',
-    dataIndex: 'userId',
-    rules: [
-      {
-        required: true,
-        message:'userId不能为空'
-      },
-      ]
-  },
-    {
-      title: 'roleId',
-      dataIndex: 'roleId',
-      rules: [
-        {
-          required: true,
-          message:'roleId不能为空'
-        },
-        ]
-    },{
-      title: 'id(删除时使用)',
-      dataIndex: 'id',
-      rules: [
-        {
-          required: true,
-          message:'id不能为空'
-        },
-      ]
-    },{
     title: '创建时间',
     dataIndex: 'createTime',
     noEdit:true,//是否渲染到编辑字段
